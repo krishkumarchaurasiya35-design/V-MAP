@@ -1,3 +1,5 @@
+Note: Please Don't Delete or Remove anything from any Portal.
+
 To Login into Admin Portal use 
 
 Email: superadmin@railway.com
