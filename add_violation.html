@@ -1,0 +1,146 @@
+<!-- -------------------------------------------------------------------
+ * File: add_violation.html
+ * Description: TTE portal for logging a new violation.
+ * Feature: Two-step process: 1. Calculate Fine & History. 2. Choose Payment Mode.
+ * ENHANCEMENT: Added welcome message placeholder.
+ * ------------------------------------------------------------------- -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record New Violation - TTE Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Specific Styles for the Violation Form */
+        .fine-display-card {
+            background-color: #eaf0f6; /* Light blue background for emphasis */
+            border-left: 6px solid var(--color-secondary);
+            padding: 20px;
+            margin-top: 20px;
+            display: none; /* Hidden until calculated */
+        }
+        .fine-display-card h3 {
+            color: var(--color-primary-dark);
+        }
+        .fine-display-card p {
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+        .violation-details {
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- Header (Simple version, as it's not the main dashboard) -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+                <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <a href="tte_dashboard.html">V-MAP: Violation Recording Hub</a>
+            </div>
+            <button class="nav-toggle">☰</button>
+            <div class="nav-links">
+                <a href="tte_dashboard.html">Dashboard</a>
+                <a href="add_violation.html" class="active">Add Violation</a>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 5px;">Record New Violation</h1>
+        <p id="welcome-message" style="margin-bottom: 15px; color: var(--color-primary);">Loading...</p>
+
+        <section class="card animate-fade-in-up">
+            <h2>Passenger & Violation Details (Step 1 of 2)</h2>
+            <form id="add-violation-form" class="form-container">
+                <fieldset>
+                    <legend style="font-weight: 700; color: var(--color-secondary); margin-bottom: 10px;">Passenger Information</legend>
+                    <div class="form-group">
+                        <label for="passenger-aadhaar">Aadhaar Number</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="passenger-aadhaar" placeholder="Enter 12-digit Aadhaar" maxlength="12">
+                            <button type="button" id="fetch-passenger-btn" class="btn btn-primary">Fetch</button>
+                        </div>
+                    </div>                 
+                    <div class="form-group">
+                        <label for="passenger-name">Full Name</label>
+                        <input type="text" id="passenger-name" placeholder="Passenger Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="passenger-mobile">Mobile Number</label>
+                        <input type="text" id="passenger-mobile" placeholder="10 digit mobile" minlength="10" maxlength="10">
+                    </div>
+                    <button type="button" id="enable-edit-btn" class="btn btn-info" style="display: none; margin-top: 5px; padding: 5px 15px; font-size: 0.8rem;">
+                        Update Details
+                    </button>
+                    <!-- Added to ensure form is complete, but optional for quick logging -->
+                    <div class="form-group" style="display: none;"> 
+                        <label for="passenger-dob">Date of Birth</label>
+                        <input type="date" id="passenger-dob">
+                    </div>
+                    <div class="form-group" style="display: none;">
+                        <label for="passenger-address">Address</label>
+                        <textarea id="passenger-address" placeholder="Residential Address"></textarea>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend style="font-weight: 700; color: var(--color-primary); margin-bottom: 10px;">Violation Details</legend>
+                    <div class="form-group">
+                        <label for="violation-type">Violation Type</label>
+                        <select id="violation-type" required>
+                            <option value="" disabled selected>Select a violation type</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="violation-location">Location/Train Name</label>
+                        <input type="text" id="violation-location" placeholder="Station Name or Train/Coach" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">Remarks (Optional)</label>
+                        <textarea id="remarks" placeholder="Any additional comments"></textarea>
+                    </div>
+                </fieldset>
+
+                <button type="button" id="calculate-fine-btn" class="btn btn-info full-width" style="margin-top: 15px;">
+                    1. Calculate Fine & Check History
+                </button>
+            </form>
+
+            <!-- Fine Display Area (Hidden until calculation) -->
+            <div id="fine-display-area" class="fine-display-card" style="display: none;">
+                <h3>Calculated Fine Amount</h3>
+                <h1 id="final-fine-amount" style="color: var(--color-danger); margin: 5px 0 10px 0;">₹0</h1>
+                <div id="fine-detail" class="violation-details">
+                    <!-- Fine breakdown and history messages injected here -->
+                </div>
+                
+                <p id="payment-restriction-msg" style="color: var(--color-danger); font-weight: 700; margin-top: 15px; display: none;">
+                    ❗ RESTRICTION: Outstanding fines detected. Payment **MUST** be made now.
+                </p>
+
+                <!-- Action Button for Next Step -->
+                <button type="button" id="proceed-to-payment-btn" class="btn btn-success modal-btn" style="width: 100%; display: none;">
+                    2. Proceed to Payment Options (Pay Now / Pay Later)
+                </button>
+            </div>
+            
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

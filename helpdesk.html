@@ -1,0 +1,137 @@
+<!-- -------------------------------------------------------------------
+
+File: helpdesk.html
+
+Description: Public page for passengers to submit violation grievances.
+
+ENHANCEMENT: Added Grievance Tracking functionality and submission confirmation area.
+
+------------------------------------------------------------------- -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VMAP Helpdesk & Grievance</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+.grievance-section-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 30px;
+}
+.grievance-track-box {
+border-left: 4px solid var(--color-info);
+}
+/* Style for the tracking result box */
+#grievance-track-result .card {
+border-radius: var(--border-radius);
+padding: 20px;
+margin-top: 15px;
+background-color: var(--color-card-bg);
+box-shadow: var(--shadow-sm);
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<header class="header">
+    <nav class="nav">
+        <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+            <a href="helpdesk.html">V-MAP: Violation Helpdesk & Grievance Portal</a>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="btn btn-secondary">← Back to Home</a>
+        </div>
+    </nav>
+</header>
+
+<div class="container animate-fade-in-up">
+    
+    <h1 style="margin-bottom: 5px;">Violation Helpdesk & Grievance</h1>
+    <p style="margin-bottom: 30px; color: var(--color-danger);">
+        Use this portal to report any issues or submit grievances regarding a recorded violation.
+    </p>
+
+    <div class="grievance-section-grid">
+        
+        <!-- 1. SUBMISSION FORM -->
+        <section class="card">
+            <h2>Submit Your Grievance</h2>
+            <form id="grievance-form" class="form-container">
+
+                <div class="form-group">
+                    <label for="g-name">Your Full Name</label>
+                    <input type="text" id="g-name" required placeholder="Name of affected passenger">
+                </div>
+
+                <div class="form-group">
+                    <label for="g-receipt-number">Violation Receipt Number (REQUIRED)</label>
+                    <input type="text" id="g-receipt-number" required placeholder="E.g., RRT1A2B3C4D5E">
+                    <small style="color: var(--color-text-light);">*Required to link your grievance to the violation record.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="g-mobile">Mobile Number</label>
+                    <input type="text" id="g-mobile" minlength="10" maxlength="10" placeholder="Your 10 digit mobile">
+                </div>
+                
+                <div class="form-group">
+                    <label for="g-email">Email Address</label>
+                    <input type="email" id="g-email" placeholder="Your contact email">
+                </div>
+
+                <div class="form-group">
+                    <label for="g-message">Grievance Details / Message</label>
+                    <textarea id="g-message" required rows="6" placeholder="Describe the nature of your grievance in detail."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-danger full-width" style="margin-top: 15px;">
+                    Submit Grievance
+                </button>
+            </form>
+
+            <!-- Submission Success Message (Hidden by default) -->
+            <div id="grievance-submission-result" style="display: none;">
+                <!-- Content injected by script.js after successful submission -->
+            </div>
+        </section>
+
+        <!-- 2. TRACKING STATUS -->
+        <section class="card grievance-track-box">
+            <h2>Track Grievance Status</h2>
+            <p style="color: var(--color-text-light); margin-bottom: 15px;">
+                Enter the Reference Number you received upon submission (e.g., GRV1A2B3C).
+            </p>
+
+            <form id="track-grievance-form" class="form-container" style="padding-top: 0;">
+                <div class="form-group">
+                    <label for="track-grievance-uid">Grievance Reference Number</label>
+                    <input type="text" id="track-grievance-uid" required placeholder="GRVXXXXXXXXX">
+                </div>
+
+                <button type="submit" class="btn btn-info full-width">
+                    🔍 Check Status
+                </button>
+            </form>
+
+            <!-- Tracking Result Area (Injected by JS) -->
+            <div id="grievance-track-result" style="margin-top: 20px; display: none;">
+                <!-- Tracking results injected here -->
+            </div>
+        </section>
+
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!-- -------------------------------------------------------------------
+ * File: index.html
+ * Description: Public Home Page + Staff Login + Fine Search Portal
+ * ENHANCEMENT: Enhanced with animations and refined responsive design.
+ * ------------------------------------------------------------------- -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-MAP: Violation Monitoring & Accountability Portal - Home</title>
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- Header & Navigation (Uses styles.css) -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <a href="index.html">V-MAP (Violation Monitoring & Accountability Portal)</a>
+            </div>
+            <button class="nav-toggle">☰</button>
+            <div class="nav-links">
+                <a href="index.html" class="active">Home</a>
+                <!-- UPDATED LINK -->
+                <a href="helpdesk.html">Helpdesk & Grievance</a>
+                <button id="login-nav-btn" class="btn btn-primary" onclick="document.getElementById('login-form-section').scrollIntoView({ behavior: 'smooth' });">Staff Login</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <!-- Added subtle animation for the hero content -->
+             <h1 class="animate-fade-in-up">Indian Railways</h1>
+            <h1 class="animate-fade-in-up animate-delay-1">V-MAP (Violation Monitoring & Accountability Portal)</h1>
+            <p class="animate-fade-in-up animate-delay-2">A digital platform ensuring accountability, safety, and compliance across the rail network.</p>
+
+            <a href="#portal-actions" class="btn btn-secondary hero-btn animate-fade-in-up animate-delay-3">
+                Access Violation Services ↓
+            </a>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container" id="portal-actions">
+
+        <!-- Mission & Features -->
+        <section class="card section-mission animate-fade-in-up animate-delay-3">
+            <h2 class="section-title color-primary">Our Mission: Fair Enforcement & Safer Travel</h2>
+
+            <p class="section-description">
+                This centralized system is used by Ticket Checkers (TCs), Station Managers, and Super Admins
+                to record and manage rule violations, ensuring fair and progressive penalties based on
+                severity and frequency.
+            </p>
+
+            <!-- Features Grid -->
+            <div class="feature-grid">
+                <div class="feature-box animate-fade-in-up animate-delay-4">
+                    <h4>⭐ Progressive Fines</h4>
+                    <p>Repeat violations automatically trigger higher penalties for improved compliance.</p>
+                </div>
+
+                <div class="feature-box animate-fade-in-up animate-delay-5">
+                    <h4>🔍 Aadhaar Tracking</h4>
+                    <p>Aadhaar verification ensures accurate offender history and prevents identity evasion.</p>
+                </div>
+
+                <div class="feature-box animate-fade-in-up animate-delay-6">
+                    <h4>📊 TC Performance</h4>
+                    <p>Managers can monitor analytics on fine collection & staff performance.</p>
+                </div>
+            </div>
+
+            <!-- Public Quick Actions -->
+            <div class="public-actions">
+                <button id="show-fines-btn" class="btn btn-info">📋 View Official Fine Rules</button>
+                <a href="helpdesk.html" class="btn btn-danger">📞 Contact Helpdesk/Grievance</a>
+            </div>
+
+            <!-- Public Rules List -->
+            <div id="public-rules-list" class="public-rules hidden" style="display: none;">
+                <!-- Injected dynamically via script.js -->
+            </div>
+        </section>
+
+        <!-- Main Action Grid -->
+        <div class="stats-grid">
+
+            <!-- Staff Login -->
+            <section class="card auth-card animate-fade-in-up" id="login-form-section">
+                <h2 class="color-primary">System Login</h2>
+                <p class="text-light">TCs, Managers, and Admins can log in below.</p>
+
+                <form id="login-form" class="form-container">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" required placeholder="user@railway.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary full-width">Sign In</button>
+                </form>
+            </section>
+
+            <!-- Fine Search & Payment -->
+            <section class="card auth-card animate-fade-in-up animate-delay-2">
+                <h2 class="color-success">💰 Find & Pay Your Fine</h2>
+                <p class="text-light">Search using Aadhaar or Mobile Number.</p>
+
+                <form id="search-fine-form" class="form-container">
+                    <div class="form-group">
+                        <label for="search-identifier">Mobile Number / Aadhaar Number</label>
+                        <input type="text" id="search-identifier" required placeholder="Enter Mobile or Aadhaar">
+                    </div>
+
+                    <button type="submit" class="btn btn-success full-width">
+                        Search Outstanding Fines
+                    </button>
+                </form>
+
+                <div id="fine-results" class="fine-results">
+                </div>
+            </section>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

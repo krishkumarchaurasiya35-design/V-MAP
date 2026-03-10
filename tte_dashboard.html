@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTE Dashboard - Railway Enforcement Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <a href="tte_dashboard.html">V-MAP: Ticket Checker Portal</a>
+            </div>
+            <button class="nav-toggle">☰</button>
+            <div class="nav-links">
+                <a href="tte_dashboard.html" class="active">Dashboard</a>
+                <a href="add_violation.html">Add Violation</a>
+                <!-- The original search.html link is removed as functionality moves here -->
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 5px;">Ticket Checker (TTE) Dashboard</h1>
+        <p id="welcome-message" style="margin-bottom: 15px; color: var(--color-primary);">Loading...</p>
+        <p style="margin-bottom: 30px; color: var(--color-text-light);">Quick access to operational tools for fine collection and enforcement.</p>
+
+        <!-- Stats Grid: Operational Overview (LOADED VIA JS) -->
+        <h2>Daily Operational Snapshot</h2>
+        <div class="stats-grid">
+            
+            <!-- Violations Today -->
+            <div class="card stat-card primary" style="border-left-color: var(--color-primary);">
+                <p>Violations Logged (Today)</p>
+                <h3 id="stat-violations-today">0</h3>
+            </div>
+
+            <!-- Fines Collected Today -->
+            <div class="card stat-card success" style="border-left-color: var(--color-success);">
+                <p>Fines Collected (Today)</p>
+                <h3 id="stat-collected-today">₹0</h3>
+            </div>
+
+            <!-- Total Outstanding for User -->
+            <div class="card stat-card danger" style="border-left-color: var(--color-danger);">
+                <p>My Total Outstanding Fines</p>
+                <h3 id="stat-my-outstanding">₹0</h3>
+            </div>
+
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- NEW SECTION: TTE Violations Portal (Search & All Records) -->
+        <h2 style="margin-bottom: 20px;">TTE Violations Portal (Your Records Only)</h2>
+        
+        <div class="card" style="padding: 20px;">
+            <form id="tte-search-form" class="form-container" style="padding-top: 0;">
+                <div class="stats-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="search-term">Search Term (Name, Aadhaar, Location, or Receipt ID)</label>
+                        <input type="text" id="search-term" placeholder="Enter keyword to filter">
+                    </div>
+                    <div class="form-group">
+                        <label for="search-date">Filter by Date (Optional)</label>
+                        <input type="date" id="search-date">
+                    </div>
+                </div>
+                
+                <div class="action-grid" style="gap: 15px;">
+                    <button type="submit" id="search-violations-btn" class="btn btn-primary">🔍 Search/Filter My Records</button>
+                    <!-- This button will simply trigger the search function with empty filters to show everything -->
+                    <button type="button" id="view-all-records-btn" class="btn btn-info">📋 View All My Records</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search Results / All Records Table -->
+        <div id="violation-results-area" class="table-responsive card" style="padding: 0; margin-top: 30px;">
+            <div class="empty-state" id="initial-search-prompt">
+                Use the search form above to find specific violations, or click 'View All My Records'.
+            </div>
+            <!-- FIX: Added default display:none for the table to ensure initial prompt is visible -->
+            <table class="data-table" style="display: none;" id="tte-results-table">
+                <thead>
+                    <tr>
+                        <th>Date/Time</th>
+                        <th>Passenger</th>
+                        <th>Aadhaar</th>
+                        <th>Fine Amount</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                        <th>Pay Option</th>
+                        <th>Profile Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tte-search-results-body">
+                    <!-- Results injected here -->
+                </tbody>
+            </table>
+        </div>
+        
+        <hr style="margin: 40px 0;">
+
+        <!-- Original Recent Violations section moved here to be the final element -->
+        <div class="card" style="margin-top: 30px;">
+            <h2>Recent Violations Recorded by You (Snapshot)</h2>
+            <div class="table-responsive" style="padding: 0;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Passenger</th>
+                            <th>Fine Amount</th>
+                            <th>Status</th>
+                            <th>Location</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tte-recent-violations-body">
+                        <tr><td colspan="5" class="text-center">Loading your recent activity...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Passenger Profile Update Modal (Required for script.js) -->
+    <div id="passenger-update-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Update Passenger Profile</h3>
+        <form id="update-passenger-form" class="form-container">
+            <input type="hidden" id="update-p-id">
+            <input type="text" id="update-p-name" placeholder="Full Name" required>
+            <input type="text" id="update-p-mobile" placeholder="Mobile Number" required minlength="10" maxlength="10">
+            <input type="date" id="update-p-dob" placeholder="Date of Birth (Optional)">
+            <textarea id="update-p-address" placeholder="Address (Optional)"></textarea>
+            <button type="submit" class="btn btn-success" style="width: 100%;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

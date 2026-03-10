@@ -1,0 +1,135 @@
+<!-- -------------------------------------------------------------------
+ * File: payment.html
+ * Description: Page for processing violation payments (Cash or UPI).
+ * This page is redirected to from add_violation.html.
+ * FIX: Removed receipt area as viewing is moved to dedicated receipt.html.
+ * ------------------------------------------------------------------- -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Gateway - Railway Enforcement Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .payment-summary {
+            background-color: var(--color-primary-dark);
+            color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .payment-summary h2 {
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        .payment-summary h1 {
+            color: var(--color-secondary);
+            font-size: 3rem;
+            margin: 15px 0;
+        }
+        .payment-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .payment-option-card {
+            cursor: pointer;
+            text-align: center;
+            padding: 40px 20px;
+            transition: all 0.3s;
+            border: 2px solid var(--color-border);
+        }
+        .payment-option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+            border-color: var(--color-primary);
+        }
+        .payment-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--color-primary);
+        }
+        
+        .upi-process {
+            border: 1px dashed var(--color-success);
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+            background-color: #f0fff4;
+        }
+        /* Receipt area styles removed */
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+                <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <!-- Title is controlled by JS based on whether it's staff or public payment -->
+                <a href="tte_dashboard.html">V-MAP: TTE Fine Collection Hub</a>
+            </div>
+            <div class="nav-links">
+                <button id="cancel-payment-btn" class="btn btn-danger">Cancel & Return</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container animate-fade-in-up">
+        
+        <h1 style="margin-bottom: 30px;">Payment Confirmation (Step 2 of 2)</h1>
+
+        <!-- PAYMENT SELECTION AREA -->
+        <div id="payment-form-area" style="display: none;">
+            <div class="payment-summary">
+                <h2>Violation Reference ID: <span id="summary-receipt-id">N/A</span></h2>
+                <p>Passenger: <span id="summary-passenger-name">N/A</span></p>
+                <h1>Current Fine Due: <span id="summary-amount">₹0</span></h1>
+            </div>
+
+            <h2 style="margin-bottom: 20px;">Select Payment Mode</h2>
+
+            <div class="payment-options-grid">
+                
+                <div id="pay-cash" class="card payment-option-card">
+                    <span class="payment-icon">💰</span>
+                    <h3>Cash Payment</h3>
+                    <p style="color: var(--color-text-light);">Confirm receipt of physical currency.</p>
+                </div>
+
+                <div id="pay-upi" class="card payment-option-card">
+                    <span class="payment-icon">📱</span>
+                    <h3>UPI / QR Code (Online)</h3>
+                    <p style="color: var(--color-text-light);">Digital payment processing (Simulated).</p>
+                </div>
+
+            </div>
+            
+            <!-- UPI Process Simulation -->
+            <div id="upi-simulation" class="upi-process card">
+                <h3>UPI Payment Processing (Simulated)</h3>
+                <p style="margin-bottom: 15px;">Scanning QR Code for <span style="font-weight: 700; color: var(--color-success);" id="upi-amount">₹0</span>...</p>
+                <!-- Placeholder for QR Code, using a utility image -->
+                <img src="https://placehold.co/150x150/28A745/ffffff?text=QR+CODE" alt="UPI QR Code Placeholder" style="margin: 15px 0; border-radius: 8px;">
+                <p>Payment successful. Tap 'Finalize' to log receipt.</p>
+            </div>
+            
+            <div id="final-actions" style="margin-top: 30px;">
+                <!-- Buttons are dynamically controlled by JS based on selection -->
+            </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

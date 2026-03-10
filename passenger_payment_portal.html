@@ -1,0 +1,107 @@
+<!-- -------------------------------------------------------------------
+ * File: passenger_payment_portal.html
+ * Description: Dedicated public page for single-mode online payment (UPI only) for outstanding fines.
+ * This page processes the payment found via the homepage search (index.html).
+ * FIX: Final payment redirects directly to the dedicated receipt.html page.
+ * ------------------------------------------------------------------- -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Fine Payment - V-MAP (Violation Monitoring & Accountability Portal)</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .payment-summary {
+            background-color: var(--color-primary-dark);
+            color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .payment-summary h2 {
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+        .payment-summary h1 {
+            color: var(--color-secondary);
+            font-size: 3rem;
+            margin: 15px 0;
+        }
+        
+        .upi-process {
+            border: 2px solid var(--color-success);
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 30px;
+            background-color: #e6ffe6; /* Light green background */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+        /* Style for the receipt view area */
+        #receipt-area {
+            display: none; 
+            margin-top: 30px;
+        }
+        #receipt-output {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: var(--border-radius);
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+                <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <a href="passenger_payment_portal.html">V-MAP: Passenger Fine Payment Portal</a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" id="cancel-payment-btn" class="btn btn-danger">← Cancel & Return to Home</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container animate-fade-in-up">
+        
+        <h1 style="margin-bottom: 30px;">Secure Online Payment (UPI)</h1>
+
+        <!-- PAYMENT SELECTION AREA (FOR OUTSTANDING FINE) -->
+        <div id="payment-form-area">
+            <div class="payment-summary">
+                <h2>Violation Reference ID: <span id="summary-receipt-id">N/A</span></h2>
+                <p>Passenger: <span id="summary-passenger-name">N/A</span></p>
+                <h1>Total Fine Due: <span id="summary-amount">₹0</span></h1>
+                <p style="font-style: italic; font-size: 0.9rem; margin-top: 10px;">Note: You are paying an existing outstanding fine.</p>
+            </div>
+
+            <div id="upi-process-container" class="upi-process">
+                <h3>Scan & Pay via UPI</h3>
+                <p style="margin-bottom: 15px; color: var(--color-success-dark);">Total Amount: <span style="font-weight: 700; color: #1e7e34;" id="upi-amount">₹0</span></p>
+                
+                <!-- Placeholder for QR Code, using a utility image -->
+                <img src="https://placehold.co/180x180/004d80/ffffff?text=UPI+QR+CODE" alt="UPI QR Code Placeholder" style="margin: 20px 0; border-radius: 8px; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                
+                <p style="font-weight: 600; margin-bottom: 20px;">Use any UPI App to scan the code above and complete the payment.</p>
+                
+                <button id="finalize-upi-btn" class="btn btn-success" style="width: 100%;">
+                    Finalize Payment (Confirm Successful Transaction)
+                </button>
+
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

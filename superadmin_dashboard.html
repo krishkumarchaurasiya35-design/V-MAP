@@ -1,0 +1,450 @@
+<!-- -------------------------------------------------------------------
+
+File: superadmin_dashboard.html
+
+Description: Professional, cleaned, optimized Super Admin Dashboard with 
+enhanced responsiveness and animations.
+
+CONSOLIDATED: Grievance review table enhanced with status and action modal.
+ENHANCEMENT: Added welcome message placeholder and animations.
+
+------------------------------------------------------------------- -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Admin Dashboard - Railway Enforcement Portal</title>
+
+<!-- Main Stylesheet -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+    /* General layout improvements for the consolidated view */
+    /* NOTE: grid-2-col and grid-3-col definitions moved/checked in styles.css for global consistency */
+    .data-section {
+        margin-top: 40px;
+        /* Animation applied directly below in the section tags */
+    }
+    
+    /* Responsive overrides (if needed, but relies mostly on styles.css media queries) */
+    @media (max-width: 768px) {
+        /* Ensuring layout responsiveness by collapsing to 1 column on mobile (defined in styles.css) */
+    }
+
+    .modal-btn {
+        margin-top: 15px;
+        width: 100%;
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<div id="toast-container"></div>
+
+<!-- Header -->
+<header class="header">
+    <nav class="nav">
+        <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+            <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+            <a href="superadmin_dashboard.html">V-MAP: Admin Portal</a>
+        </div>
+
+        <button class="nav-toggle">☰</button>
+
+        <div class="nav-links">
+            <a href="superadmin_dashboard.html" class="active">Dashboard</a>
+
+            <!-- Hidden links for Super Admin as functionality is consolidated -->
+
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+        </div>
+    </nav>
+</header>
+
+<!-- Main Container -->
+<div class="container animate-fade-in-up">
+
+    <h1 style="margin-bottom: 5px;">Super Admin Dashboard</h1>
+    <p id="welcome-message" style="margin-bottom: 15px; color: var(--color-primary);">Loading...</p>
+    <p style="margin-bottom: 30px; color: var(--color-text-light);">System-wide compliance and all management controls.</p>
+
+    <!-- SECTION: Financial Health (Animated & Responsive Grid: grid-3-col defined in CSS) -->
+    <h2 class="animate-fade-in-up animate-delay-1">Analytics: System Financial Health (Overall Fine Collections)</h2>
+    <div class="stats-grid animate-fade-in-up animate-delay-2">
+
+        <div class="card stat-card primary">
+            <p>Total Fines Recorded</p>
+            <h3 id="stat-total-recorded">Loading...</h3>
+        </div>
+
+        <div class="card stat-card success">
+            <p>Total Fines Collected</p>
+            <h3 id="stat-total-collected">Loading...</h3>
+        </div>
+
+        <div class="card stat-card accent">
+            <p>Collection Rate</p>
+            <h3 id="stat-collection-rate">Loading...</h3>
+        </div>
+
+    </div>
+
+    <!-- SECTION: Staff Summary (Animated & Responsive Grid: stats-grid defined in CSS) -->
+    <h2 style="margin-top: 20px;" class="animate-fade-in-up animate-delay-3">Analytics: Staff & Violation Summary (Total Admins)</h2>
+    <div class="stats-grid animate-fade-in-up animate-delay-4">
+
+        <div class="card stat-card info">
+            <p>Active Station Managers (Admins)</p>
+            <h3 id="stat-managers">Loading...</h3>
+        </div>
+
+        <div class="card stat-card warning">
+            <p>Active TTEs</p>
+            <h3 id="stat-ttes">Loading...</h3>
+        </div>
+
+        <div class="card stat-card danger">
+            <p>Total Repeat Offenders</p>
+            <h3 id="stat-repeat-offenders">Loading...</h3>
+        </div>
+
+    </div>
+
+    <!-- SECTION 1: Manage Staff (Animated & Responsive Grid: grid-2-col needs update) -->
+    <section class="data-section animate-fade-in-up animate-delay-5">
+        <h2 style="margin-bottom: 20px;">1. Manage Staff Data</h2>
+
+        <div class="grid-2-col" style="grid-template-columns: 1fr 2.5fr; gap: 20px;">
+
+            <!-- Create Staff -->
+            <div class="form-card">
+                <h3>Create New Station Manager</h3>
+                <p style="color: var(--color-danger); margin-bottom: 10px; font-size: 0.9rem;">(Only Station Manager accounts can be created by Admin)</p>
+
+                <form id="create-staff-form" class="form-container">
+
+                    <select id="staff-role" required>
+                        <!-- This will be automatically populated with 'Station Manager' only by JS -->
+                        <option value="" disabled selected>Loading Roles...</option>
+                    </select>
+
+                    <input type="text" id="staff-station-name" placeholder="Station Name (E.g., Mumbai Central)" required disabled>
+
+                    <input type="text" id="staff-full-name" placeholder="Full Name" required>
+
+                    <input type="number" id="staff-age" placeholder="Age" required min="18">
+
+                    <input type="text" id="staff-employee-id" placeholder="Employee ID (Unique)" required>
+
+                    <input type="email" id="staff-email" placeholder="Email ID (Login)" required>
+
+                    <input type="password" id="staff-password" placeholder="Password (Min 6 chars)" minlength="6" required>
+
+                    <input type="text" id="staff-mobile-number" placeholder="Mobile Number" minlength="10" maxlength="10" required>
+
+                    <button type="submit" class="btn btn-success">Create Station Manager Account</button>
+                </form>
+            </div>
+
+            <!-- Staff Table -->
+            <div class="card">
+                <h3>Overall Staff List (Edit/Delete Access)</h3>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Role</th>
+                                <th>Station</th>
+                                <th>Name (H/O)</th>
+                                <th>Emp ID</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="staff-table-body">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading staff records...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 2: Rules & Fines (Animated & Responsive Grid: grid-2-col) -->
+    <section class="data-section animate-fade-in-up animate-delay-6">
+    <h2 style="margin-bottom: 20px;">2. Manage Violation Rules and Fines</h2>
+
+        <div class="grid-2-col" style="grid-template-columns: 1fr 2.5fr; gap: 20px;">
+        
+            <div class="form-card">
+                <h3>Create New Rule</h3>
+                <form id="add-rule-form" class="form-container">
+                    <div class="form-group">
+                        <label for="new-rule-name">Violation Name</label>
+                        <input type="text" id="new-rule-name" placeholder="Violation Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-rule-fine">Base Fine Amount (₹)</label>
+                        <input type="number" id="new-rule-fine" placeholder="Base Fine Amount (₹)" min="10" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add New Rule</button>
+                </form>
+            </div>
+
+            <div class="card" style="padding: 20px; overflow: hidden;">
+                <h3>Official Rulebook</h3>
+                <button type="button" id="toggle-rules-btn" class="btn btn-info" style="width: 100%; margin-bottom: 15px;">
+                    View Current Rules and Fines
+                </button>
+
+                <div id="rules-table-wrapper" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Violation Type</th>
+                                    <th>Base Fine (₹)</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rules-table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: Grievance Portal (Animated) -->
+    <section class="data-section animate-fade-in-up">
+        <h2 style="margin-bottom: 20px;">3. Manage Passenger Grievances </h2>
+        
+        <div class="card">
+            <h3>Latest 10 Submitted Grievances</h3>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Ref ID</th> 
+                            <th>Passenger</th>
+                            <th>Violation ID</th> 
+                            <th>Status</th> 
+                            <th>Message</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grievance-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center">Loading submitted grievances...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <hr style="margin: 40px 0;">
+
+    <!-- SECTION 3: Fines & History (Enhanced with Search) (Animated) -->
+    <section class="data-section animate-fade-in-up">
+        <h2 style="margin-bottom: 20px;">4. Violation Records & Fine History</h2>
+
+        <!-- Search Form -->
+        <div class="card" style="padding: 20px; margin-bottom: 30px;">
+            <h3>Search All Violation Records</h3>
+            <form id="superadmin-search-form" class="form-container" style="padding-top: 0;">
+                <!-- Grid for search filters - now using flexible grid structure -->
+                <div class="stats-grid" style="gap: 15px; margin-bottom: 0;">
+                    <div class="form-group">
+                        <label for="admin-search-term">Search Term (Name, Aadhaar, Location, or Receipt ID)</label>
+                        <input type="text" id="admin-search-term" placeholder="Enter keyword to filter records">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-search-status">Filter by Status</label>
+                        <select id="admin-search-status">
+                            <option value="all">All Statuses</option>
+                            <option value="paid">Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="flex-grow: 1;">Filter Violation History</button>
+                    <button type="button" id="admin-clear-search-btn" class="btn btn-info" style="flex-grow: 1;">Clear Filter / Show All Records</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- History (Full Control) -->
+        <div class="card">
+            <h3 style="padding: 20px 20px 0 20px;">Violation History Records</h3>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Passenger/Ref ID</th> <!-- Updated for visibility -->
+                            <th>Violation</th>
+                            <th>Fine (₹)</th>
+                            <th>Status</th>
+                            <th>Fined by (TC ID)</th> <!-- Updated for clarity -->
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="history-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center">Loading latest 5.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+
+        <!-- Mini Stats Grid -->
+        <div class="grid-3-col">
+
+            <div class="card info">
+                <p>Total Outstanding Fines (Pending)</p>
+                <h3 id="stat-pending-fines">Loading...</h3>
+            </div>
+
+            <div class="card success">
+                <p>Total Paid Fines (Collected)</p>
+                <h3 id="stat-total-collected-history">Loading...</h3>
+            </div>
+
+            <div class="card primary">
+                <p>Total Violations Logged</p>
+                <h3 id="stat-total-violations">Loading...</h3>
+            </div>
+
+        </div>
+
+        <!-- Pending Fines (Simplified View) -->
+        <div class="card" style="margin-bottom: 30px;">
+            <h3>Latest 10 Pending Fines (For Collection)</h3>
+
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Passenger</th>
+                            <th>Aadhaar</th>
+                            <th>Fine (₹)</th>
+                            <th>TC Emp ID</th>
+                            <th>Location</th>
+                            <th>Action</th> <!-- Collect Fine -->
+                        </tr>
+                    </thead>
+
+                    <tbody id="pending-fines-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+<!-- Staff Profile Update Modal (Used by Super Admin for Managers/TTEs) -->
+<div id="staff-update-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+
+        <span class="close-btn">&times;</span>
+
+        <h3>Update Staff Profile</h3>
+
+        <form id="update-staff-form" class="form-container">
+            <input type="hidden" id="update-staff-id">
+            
+            <input type="text" id="update-staff-name" placeholder="Full Name" required>
+            <input type="number" id="update-staff-age" placeholder="Age" required min="18">
+            <input type="text" id="update-staff-mobile" placeholder="Mobile Number" minlength="10" maxlength="10" required>
+            <input type="text" id="update-staff-employee-id" placeholder="Employee ID" required>
+            <input type="text" id="update-staff-station-name" placeholder="Station Name (Managers Only)" disabled>
+            
+            <button type="submit" class="btn btn-success modal-btn">Save Changes</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- Rule Fine Update Modal -->
+<div id="rule-update-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Update Rule Fine</h3>
+        <form id="update-rule-fine-form" class="form-container">
+            <input type="hidden" id="update-rule-id">
+            <p>Updating rule: <strong id="update-rule-name-display">N/A</strong></p>
+            <div class="form-group">
+                <label for="update-new-fine">New Base Fine Amount (₹)</label>
+                <input type="number" id="update-new-fine" placeholder="Enter new fine amount" min="10" required>
+            </div>
+            <button type="submit" class="btn btn-success modal-btn">Save New Fine</button>
+        </form>
+    </div>
+</div>
+
+<!-- Grievance Review and Remark Modal -->
+<div id="grievance-remark-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Review Grievance & Add Remark</h3>
+        <form id="update-grievance-remark-form" class="form-container">
+            <input type="hidden" id="grievance-id">
+            
+            <p><strong>Reference ID:</strong> <span id="grievance-uid-display">N/A</span></p>
+            <p style="margin-bottom: 10px;"><strong>Message:</strong> <span id="grievance-message-display" style="font-style: italic;">Loading...</span></p>
+
+            <div class="form-group">
+                <label for="grievance-new-status">Update Status</label>
+                <select id="grievance-new-status" required>
+                    <option value="PENDING">PENDING (Awaiting Review)</option>
+                    <option value="REVIEWED">REVIEWED (Action Pending)</option>
+                    <option value="CLOSED">CLOSED (Resolved/Finalized)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="grievance-remark">Super Admin Remark (Publicly Visible)</label>
+                <textarea id="grievance-remark" rows="4" placeholder="Enter the official response/resolution for the passenger to see." required></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary modal-btn">Save Remark & Update Status</button>
+        </form>
+    </div>
+</div>
+
+<script src="script.js"></script>
+
+
+</body>
+</html>

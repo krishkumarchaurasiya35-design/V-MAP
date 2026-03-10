@@ -1,0 +1,229 @@
+<!-- -------------------------------------------------------------------
+ * File: admin_dashboard.html
+ * Description: Station Manager dashboard consolidated for TTE management, analytics, and reporting.
+ * ENHANCEMENT: Added 'Violations Today' stat card.
+ * ENHANCEMENT: Added 'TC Performance Report' section for filtering by date (Day/Month).
+ * ------------------------------------------------------------------- -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station Manager Dashboard - V-MAP: Station Manager Portal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Removed custom styles block and moved grid-2-col-admin to styles.css -->
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- Reusable Header and Navigation -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-title" style="display: flex; align-items: center; gap: 15px;">
+                <img src="logo.png" alt="Railway Logo" id="portal-logo" style="height: 40px; width: auto;">
+                <a href="admin_dashboard.html">V-MAP: Station Manager Portal</a>
+            </div>
+            <button class="nav-toggle">☰</button>
+            <div class="nav-links">
+                <a href="admin_dashboard.html" class="active">Dashboard</a>
+                <!-- Hidden links for Manager as TTE/Violation links are not primary here -->
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-bottom: 5px;">Station Manager Dashboard</h1>
+        <p id="welcome-message" style="margin-bottom: 15px; color: var(--color-primary);">Loading...</p> 
+        <p style="margin-bottom: 30px; color: var(--color-text-light);">
+            Manage TTE staff, fine collection, and performance analytics for your station.
+        </p>
+
+        <!-- Stats Grid: Analytics of TTEs and Fine Collection -->
+        <h2 style="margin-bottom: 15px;">Analytics: TTE Team Fine Collection Summary</h2>
+        <div class="stats-grid">
+
+            <div class="card stat-card primary">
+                <p>Total Fine Recorded (All Time)</p>
+                <h3 id="admin-total-recorded">Loading...</h3>
+            </div>
+
+            <div class="card stat-card success">
+                <p>Total Fine Collected (All Time)</p>
+                <h3 id="admin-total-collected">Loading...</h3>
+            </div>
+
+            <div class="card stat-card info">
+                <p>Violations Recorded (Today)</p>
+                <h3 id="admin-violations-today">0</h3>
+            </div>
+            
+            <div class="card stat-card accent">
+                <p>Collection Rate (All Time)</p>
+                <h3 id="admin-collection-rate">Loading...</h3>
+            </div>
+
+        </div>
+
+        <hr style="margin: 40px 0;">
+        
+        <!-- NEW SECTION: TC Report Generator -->
+        <h2 style="margin-bottom: 20px;">1. TTE Performance Report Generator</h2>
+        <div class="card" style="padding: 20px;">
+            <h3>Generate Filtered Report for Your TTEs</h3>
+            <form id="tc-report-form" class="form-container" style="padding-top: 0;">
+                <div class="stats-grid" style="margin-bottom: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="form-group">
+                        <label for="report-start-date">Start Date</label>
+                        <input type="date" id="report-start-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-end-date">End Date</label>
+                        <input type="date" id="report-end-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="report-type">Report Aggregation</label>
+                        <select id="report-type" required>
+                            <option value="tte">Aggregated by TTE (Overall)</option>
+                            <!-- Day/Month breakdown is complex and usually requires a back-end pivot, 
+                                 so we simplify to overall TTE aggregation for now to ensure front-end stability. -->
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-info full-width">
+                    📊 Generate Performance Report
+                </button>
+            </form>
+            
+            <!-- Report Output Area -->
+            <div id="tc-report-output" class="table-responsive card" style="padding: 0; margin-top: 25px; display: none;">
+                <h3 style="padding: 15px; border-bottom: 1px solid var(--color-border);">Report Results: <span id="report-title-date"></span></h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>TTE Name</th>
+                            <th>Total Violations</th>
+                            <th>Total Fine Recorded (₹)</th>
+                            <th>Total Fine Collected (₹)</th>
+                            <th>Collection Rate (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tc-report-table-body">
+                        <!-- Report data injected here -->
+                    </tbody>
+                </table>
+                <div class="empty-state" id="report-summary" style="margin-top: 0; border-radius: 0 0 var(--border-radius) var(--border-radius);"></div>
+            </div>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+        <!-- Section: TTE Management and Profile Update (Requirement 1 & 4) -->
+        <h2 style="margin-bottom: 20px;">2. TTE Management and Profile Update</h2>
+        
+        <div class="grid-2-col-admin">
+            <!-- TTE Creation Form (Requirement 1) -->
+            <div class="form-card">
+                <h3>Create New TTE Account</h3>
+                <p style="color: var(--color-primary); font-size: 0.9rem;">(Will be automatically assigned to your station.)</p>
+                <form id="create-tte-form" class="form-container">
+                    <input type="text" id="tte-full-name" placeholder="Name of TTE" required>
+                    <input type="number" id="tte-age" placeholder="Age" required min="18">
+                    <input type="text" id="tte-employee-id" placeholder="Employee ID (Unique)" required>
+                    <input type="text" id="tte-mobile-number" placeholder="Mobile Number" required minlength="10" maxlength="10">
+                    <input type="email" id="tte-email" placeholder="Email ID (Login)" required>
+                    <input type="password" id="tte-password" placeholder="Password (Min 6 chars)" required minlength="6">
+                    <button type="submit" class="btn btn-primary">Create TTE Account</button>
+                </form>
+            </div>
+
+            <!-- TTE Profile Update & List (Requirement 4) -->
+            <div class="card" style="padding: 20px 0;">
+                <h3>Manage/Update TTE Profiles</h3>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Emp ID</th>
+                                <th>Mobile</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manage-tte-body">
+                            <tr><td colspan="4" class="text-center">Loading TTE data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <hr style="margin: 40px 0;">
+
+
+        <!-- Section: TTE Performance and Violation Tracking (Requirement 2 & 3) -->
+        <h2 style="margin-bottom: 15px;">3. TTE Performance and Registered Violations</h2>
+        
+        <!-- TTE Performance Table -->
+        <h3 style="margin-bottom: 10px;">Individual TTE Performance (All Time)</h3>
+        <div class="table-responsive card" style="padding: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>TC Name</th>
+                        <th>Employee ID</th>
+                        <th>Total Recorded (₹)</th>
+                        <th>Total Collected (₹)</th>
+                        <th>Collection Rate (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="tc-performance-body">
+                    <tr><td colspan="5" class="text-center">Loading TC data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Passenger List (Fined by Assigned TCs) -->
+        <h3 style="margin-top: 30px; margin-bottom: 10px;">Violation Records (Latest 10 by Your TTEs)</h3>
+        <div class="table-responsive card" style="padding: 0;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Passenger Name</th>
+                        <th>Aadhaar Number</th>
+                        <th>Fine Amount (₹)</th>
+                        <th>Status</th>
+                        <th>TC Emp ID</th>
+                        <th>Action</th> 
+                    </tr>
+                </thead>
+                <tbody id="admin-passenger-list">
+                    <tr><td colspan="6" class="text-center">Loading violation records...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- Modal for TTE Profile Update -->
+    <div id="tte-update-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>Update TTE Profile</h3>
+        <form id="update-tte-form" class="form-container">
+            <input type="hidden" id="update-tte-id">
+            <input type="text" id="update-tte-name" placeholder="Full Name" required>
+            <input type="number" id="update-tte-age" placeholder="Age" required min="18">
+            <input type="text" id="update-tte-mobile" placeholder="Mobile Number" required minlength="10" maxlength="10">
+            <input type="text" id="update-tte-employee-id" placeholder="Employee ID" required>
+            <button type="submit" class="btn btn-success" style="width: 100%;">Save Changes</button>
+        </form>
+      </div>
+    </div>
+</body>
+</html>
